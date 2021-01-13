@@ -35,7 +35,7 @@ public class MoveController {
         Links.update(1500 + turningSpeed);
         Rechts.update(1500 + turningSpeed);
         // Boebot de berekende tijd laten wachten
-        BoeBot.wait(timePerDegree * 90);
+        BoeBot.wait(timePerDegree * 93);
 
         // Boebot stoppen
         emergencyBrake(Links, Rechts);
@@ -83,13 +83,13 @@ public class MoveController {
                 ModelData.setRichting("west");
                 break;
             case "oost":
-                ModelData.setRichting("zuid");
+                ModelData.setRichting("noord");
                 break;
             case "zuid":
                 ModelData.setRichting("oost");
                 break;
             case "west":
-                ModelData.setRichting("noord");
+                ModelData.setRichting("zuid");
                 break;
             default:
                 System.out.println("error");
@@ -118,39 +118,41 @@ public class MoveController {
 //          draaien(analogeWaardeR, analogeWaardeM, analogeWaardeL, Rechts, Links);
 
         if (analogeWaardeM > 60 && analogeWaardeL > 60 && analogeWaardeR > 60) {
-            System.out.println("Hier is een kruispunt");
             Rechts.update(1525);
             Links.update(1475);
-            BoeBot.wait(1150);
 
             if(ModelData.getTestCount() == 1){
                 ModelData.setCurrentY(ModelData.getNextY());
+                System.out.println("Current Y = " + ModelData.getCurrentY());
                 ModelData.setCurrentX(ModelData.getNextX());
+                System.out.println("Current X = " + ModelData.getCurrentX());
             }
+
             detectObstacle(Links, Rechts);
             ModelData.setTestCount(1);
+            BoeBot.wait(1150);
             CalcRoute.driveRoute(Links, Rechts);
 
+            //Naar voren
         } else if (analogeWaardeR > 60 && analogeWaardeM < 60 && analogeWaardeL > 60) {
             Rechts.update(1525);
             Links.update(1475);
-            System.out.println("recht zo die gaat");
+            //Naar voren
         } else if (analogeWaardeR < 60 && analogeWaardeM > 60 && analogeWaardeL < 60) {
             Rechts.update(1525);
             Links.update(1475);
-            System.out.println("recht zo die gaat");
+            //Naar rechts corrigeren
         } else if (analogeWaardeR > 60 && analogeWaardeL < 60) {
             Rechts.update(1500);
             Links.update(1500);
             Rechts.update(1525);
             Links.update(1500);
-            System.out.println("rechts");
+            //Naar links corrigeren
         } else if (analogeWaardeL > 60 && analogeWaardeR < 60) {
             Rechts.update(1500);
             Links.update(1500);
             Rechts.update(1500);
             Links.update(1475);
-            System.out.println("links");
         } else if (analogeWaardeM < 60 && analogeWaardeL < 60 && analogeWaardeR < 60) {
             Rechts.update(1525);
             Links.update(1475);
@@ -176,14 +178,21 @@ public class MoveController {
             int currentY = ModelData.getCurrentY();
 
             ArrayList<Node> obstacleList = ModelData.getBlocksArray();
+            System.out.println(obstacleList);
 
             switch(ModelData.getRichting()) {
                 case "noord":
+                    System.out.println("Northern Switch");
+                    System.out.println("Current X = " + ModelData.getCurrentX());
+                    System.out.println("Current Y = " + ModelData.getCurrentY());
                     Node detectedObstacleN = new Node(currentX, currentY +1);
                     Boolean newObstacleN = checkObstacles(obstacleList, detectedObstacleN, 0);
                     if(newObstacleN == true){
                         emergencyBrake(Links, Rechts);
-                        CalcRoute.calcRoute();
+                        System.out.println("Emergency break before calculating");
+                        System.out.println("Start row = " + ModelData.getsRow());
+                        System.out.println("Star Col - " + ModelData.getsCol());
+                        CalcRoute.reCalcRoute();
                     }
 
                     else{
@@ -196,7 +205,7 @@ public class MoveController {
                     Boolean newObstacleO = checkObstacles(ModelData.getBlocksArray(), detectedObstacleO, 0);
                     if(newObstacleO == true){
                         emergencyBrake(Links, Rechts);
-                        CalcRoute.calcRoute();
+                        CalcRoute.reCalcRoute();
                     }
 
                     else{
@@ -209,7 +218,7 @@ public class MoveController {
                     Boolean newObstacleZ = checkObstacles(ModelData.getBlocksArray(), detectedObstacleZ, 0);
                     if(newObstacleZ == true){
                         emergencyBrake(Links, Rechts);
-                        CalcRoute.calcRoute();
+                        CalcRoute.reCalcRoute();
                     }
 
                     else{
@@ -222,7 +231,7 @@ public class MoveController {
                     Boolean newObstacleW = checkObstacles(ModelData.getBlocksArray(), detectedObstacleW, 0);
                     if(newObstacleW == true){
                         emergencyBrake(Links, Rechts);
-                        CalcRoute.calcRoute();
+                        CalcRoute.reCalcRoute();
 
                     }
 
@@ -239,17 +248,21 @@ public class MoveController {
     }
 
     public static boolean checkObstacles(ArrayList<Node> obstacleList, Node detectedObstacle, int offset){
+        System.out.println("Check obstacle");
+        System.out.println("Detected obstacle 1 = " + detectedObstacle);
 
-        if (offset < obstacleList.size()/*-1*/){
+        if (offset <= obstacleList.size()){
+            System.out.println("Binnen if statement");
             Node obstacle = obstacleList.get(offset);
             if (obstacle.getRow() != detectedObstacle.getRow() && obstacle.getCol() != detectedObstacle.getCol()){
+                System.out.println("Detected obstacle = " + detectedObstacle);
                 obstacleList.add(detectedObstacle);
+                System.out.println("Obstacle list = " + obstacleList);
                 ModelData.setBlocksArray(obstacleList);
-                BoeBot.freqOut(14,1500,1);
-                BoeBot.wait(1000);
-                BoeBot.freqOut(14,0,1);
+                System.out.println("BlockArray = " + ModelData.getBlocksArray().toString());
                 ModelData.setsRow(ModelData.getCurrentX());
                 ModelData.setsCol(ModelData.getCurrentY());
+                System.out.println("Return true from CheckObstacle");
                 return true;
             }
 
@@ -258,6 +271,7 @@ public class MoveController {
         }
 
         else{
+            System.out.println("Return False from checkOBstacle");
             return false;
         }
     }

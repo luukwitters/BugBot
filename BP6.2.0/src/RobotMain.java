@@ -16,10 +16,10 @@ public class RobotMain {
 
 
     public static void main(String[] args) {
-        System.out.println("Even wachtennn");
+        System.out.println("Even wachten");
         BoeBot.digitalWrite(11, false);
         BoeBot.digitalWrite(2, false);
-        BoeBot.wait(8000);
+        BoeBot.wait(5000);
         CalcRoute.calcRoute();
 //        MoveController moveController = new MoveController();
 //        moveController.checkObstacles(ModelData.getBlocksArray(),new Node(1,3), 0);
@@ -34,9 +34,11 @@ public class RobotMain {
 
             if(ModelData.getWhiles() == "Start") {
                 Controller.MoveController.lineFollow(Links, Rechts);
+//                Controller.MoveController.detectObstacle(Links, Rechts);
             }
 
-            else if (ModelData.getWhiles() == "Stop") {
+            else if (ModelData.getWhiles() == "Standby") {
+//                MoveController.knipper();
 
             }
         }
